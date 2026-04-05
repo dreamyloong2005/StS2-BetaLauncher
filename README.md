@@ -67,8 +67,9 @@ If one prerequisite is optional, then it is techically unnecessary if you only w
 5. Put precompiled assets in the same folder.
 6. Put `fmod.jar` and `godot-lib.4.5.1.stable.template_release.aar` in `android\libs\release`
 7. Put .so libs in `android\libs\release\arm64-v8a`
-8. gradle wrapper (Optional, if you want to regenerate gradlew.bat)
-9. .\gradle clean, .\gradlew assembleMonoRelease
+8. Put godot in `vendor\godot`
+9. gradle wrapper (Optional, if you want to regenerate gradlew.bat)
+10. .\gradle clean, .\gradlew assembleMonoRelease
 
 Output: `android/build/outputs/apk/mono/release/StS2BetaLauncher-v<version>.apk`
 
