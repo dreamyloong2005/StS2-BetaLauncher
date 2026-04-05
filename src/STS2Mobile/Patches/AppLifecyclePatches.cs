@@ -250,7 +250,7 @@ public static class AppLifecyclePatches
 
             PatchHelper.Log("NGame.Quit intercepted, restarting app");
             var jcw = Engine.GetSingleton("JavaClassWrapper");
-            var wrapper = (GodotObject)jcw.Call("wrap", "com.game.sts2launcher.GodotApp");
+            var wrapper = (GodotObject)jcw.Call("wrap", "com.game.sts2betalauncher.GodotApp");
             var godotApp = (GodotObject)wrapper.Call("getInstance");
             godotApp.Call("restartApp");
             return false;
