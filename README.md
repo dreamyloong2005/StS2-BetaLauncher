@@ -19,7 +19,7 @@ This is a project forked from StS2 Launcher: https://github.com/Ekyso/StS2-Launc
 - **Credential security**  
   Steam refresh tokens encrypted at rest via Android Keystore (AES-256-GCM, hardware-backed TEE).
 - **Full Modding Capability**  
-  Turn on "Local Backup" to load mods from /storage/emulated/0/StS2BetaLauncher/Mods.
+  Turn on "Local Backup" to load mods from `/storage/emulated/0/StS2BetaLauncher/Mods.`
 
 ## Changes from the original version
 
