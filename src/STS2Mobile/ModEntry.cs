@@ -77,6 +77,7 @@ public static class ModEntry
             ModLoaderPatches.Apply(_harmony);
             LauncherPatches.Apply(_harmony);
             SaveDiagnosticPatches.Apply(_harmony);
+            NDevConsolePatches.Apply(_harmony);
 
             PatchHelper.Log("All game patches applied.");
         }
