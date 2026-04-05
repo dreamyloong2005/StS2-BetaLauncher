@@ -1,24 +1,52 @@
-# Compiled class file
-*.class
+# Windows
+*.bat
 
-# Log file
-*.log
+# Build outputs
+android/build/
+android/.gradle/
+android/.cxx/
+android/assets/dotnet_bcl/
+android/local.properties
+android/res/values-*/godot_project_name_string.xml
+android/res/values/godot_project_name_string.xml
+src/patcher/bin/
+src/patcher/obj/
+src/STS2Mobile/bin/
+src/STS2Mobile/obj/
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
+# Large binary files
 *.tar.gz
-*.rar
+*.apk
+*.so
+*.pck
+*.aar
+*.aar.bak*
+*.jar
+*.keystore
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# Third-party sources & SDKs
+vendor/
+
+# FMOD logos (proprietary)
+android/assets/FMOD_LOGOS/
+
+# Upstream game files
+upstream/
+
+# Python venv
+venv/
+
+# Logs
+logs.txt
+
+# Hidden directories
+.*
+!.gitignore
+
+# IDE
+*.user
+*.suo
+
+# .NET
+*.nupkg
+patchnotes.md
