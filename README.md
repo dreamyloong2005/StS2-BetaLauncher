@@ -77,7 +77,7 @@ Only for learning use!
 
 Output: `android/build/outputs/apk/mono/release/StS2BetaLauncher-v<version>.apk`
 
-PS: You can change to your own keystore file or simply use mine.
+PS: You can change to your own keystore or simply use mine.
 
 ### Installing
 
