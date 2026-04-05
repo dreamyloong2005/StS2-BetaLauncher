@@ -18,16 +18,12 @@ public static class ModLoaderPatches
     {
         try
         {
-            var initMethod = typeof(ModManager).GetMethod(
+            PatchHelper.Patch(
+                harmony,
+                typeof(ModManager),
                 "Initialize",
-                BindingFlags.Public | BindingFlags.Static
+                postfix: PatchHelper.Method(typeof(ModLoaderPatches), nameof(InitializePostfix))
             );
-            var postfixMethod = typeof(ModLoaderPatches).GetMethod(
-                nameof(InitializePostfix),
-                BindingFlags.Public | BindingFlags.Static
-            );
-
-            harmony.Patch(initMethod, postfix: new HarmonyMethod(postfixMethod));
             PatchHelper.Log("[ModLoader] 成功注入 ModManager.Initialize 后置补丁！");
         }
         catch (Exception ex)
