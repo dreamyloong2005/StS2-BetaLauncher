@@ -61,15 +61,15 @@ If one prerequisite is optional, then it is techically unnecessary if you only w
 **Note: The tutorial is only intended to generate installable an apk, if you want to compile all components yourself, see the README.md in the original repo. (In my test, it seemed almost impossible under a Windows environment.)** 
 
 1. Git clone the project, cd StS2-BetaLauncher
-2. cd src, csharpier format ., dotnet publish -c Release, cd ..\android
+2. `cd src`, `csharpier format .`, `dotnet publish -c Release`, `cd ..\android`
 3. Find `STS2Mobile.dll` in `src\bin\Release\net9.0`
 4. Copy it to `android\assets\dotnet_bcl`
 5. Put precompiled assets in the same folder.
 6. Put `fmod.jar` and `godot-lib.4.5.1.stable.template_release.aar` in `android\libs\release`
 7. Put .so libs in `android\libs\release\arm64-v8a`
 8. Put godot in `vendor\godot`
-9. gradle wrapper (Optional, if you want to regenerate gradlew.bat)
-10. .\gradle clean, .\gradlew assembleMonoRelease
+9. `gradle wrapper` (Optional, if you want to regenerate gradlew.bat)
+10. `.\gradle clean`, `.\gradlew assembleMonoRelease`
 
 Output: `android/build/outputs/apk/mono/release/StS2BetaLauncher-v<version>.apk`
 
