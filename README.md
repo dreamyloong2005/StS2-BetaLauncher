@@ -51,7 +51,7 @@ If one prerequisite is optional, then it is techically unnecessary if you only w
 
 - .NET 9 SDK (9.0.312 Recommended)
 - Android SDK35 + NDK r28b
-- Python 3 (Optional, if you want to run `make-bootstrap-pck.py` and use SCons to compile godot yourself)
+- Python 3 (Optional, if you want to run `make-bootstrap-pck.py` to make bootstraper.pck or use SCons to compile godot yourself)
 - Original game files in `upstream/godot-export/` (Optional)
 - Godot Engine (Necessary, put in `vendor\godot\`; Custom build is optional, see `scripts\build-godot.sh`)
 - FMOD SDK in `vendor\fmod-sdk\` (Optional)
