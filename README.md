@@ -6,7 +6,7 @@ This is a project forked from StS2 Launcher: https://github.com/Ekyso/StS2-Launc
 
 - **Steam authentication**  
   Login via SteamKit2 with Steam Guard 2FA support.
-- **STS2 public-beta branch Game file download**  
+- **STS2 public-beta branch game file download**  
   Depot download directly from Steam, with update checking.
 - **Cloud saves**  
   Full Steam cloud sync via SteamKit2's CCloud API, with timestamp-aware conflict resolution and non-blocking background uploads.
@@ -19,6 +19,7 @@ This is a project forked from StS2 Launcher: https://github.com/Ekyso/StS2-Launc
 - **Credential security**  
   Steam refresh tokens encrypted at rest via Android Keystore (AES-256-GCM, hardware-backed TEE).
 - **Full Modding Capability**
+- 
   Turn on "Local Backup" to load mods from /storage/emulated/0/StS2BetaLauncher/Mods.
 
 ## Changes from the original version
