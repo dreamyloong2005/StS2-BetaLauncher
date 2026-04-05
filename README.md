@@ -45,7 +45,7 @@ scripts/                   # Build and tooling scripts
 
 ## Prerequisites
 
-The following prerequisites are copied from the original README.md.
+The following prerequisites are copied from the `README.md` of the original repo.
 
 If one prerequisite is optional, then it is techically unnecessary if you only want to generate an apk.
 
@@ -60,7 +60,7 @@ If one prerequisite is optional, then it is techically unnecessary if you only w
 
 **Note: The tutorial is only intended to generate installable an apk, if you want to compile all components yourself, see the README.md in the original repo. (In my test, it seemed almost impossible under a Windows environment.)** 
 
-1. Git clone the project, cd StS2-BetaLauncher
+1. Git clone the project, `cd StS2-BetaLauncher`
 2. `cd src`, `csharpier format .`, `dotnet publish -c Release`, `cd ..\android`
 3. Find `STS2Mobile.dll` in `src\bin\Release\net9.0`
 4. Copy it to `android\assets\dotnet_bcl`
