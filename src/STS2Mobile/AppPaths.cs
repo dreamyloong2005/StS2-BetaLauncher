@@ -7,7 +7,7 @@ namespace STS2Mobile;
 // Shared path constants for external storage directories and permission helpers.
 public static class AppPaths
 {
-    private const string ExternalRoot = "/storage/emulated/0/StS2Launcher";
+    private const string ExternalRoot = "/storage/emulated/0/StS2BetaLauncher";
     public const string ExternalModsDir = ExternalRoot + "/Mods";
     public const string ExternalSaveBackupsDir = ExternalRoot + "/Saves";
 
@@ -65,7 +65,7 @@ public static class AppPaths
         try
         {
             var jcw = Engine.GetSingleton("JavaClassWrapper");
-            var wrapper = (GodotObject)jcw.Call("wrap", "com.game.sts2launcher.GodotApp");
+            var wrapper = (GodotObject)jcw.Call("wrap", "com.game.sts2betalauncher.GodotApp");
             return (GodotObject)wrapper.Call("getInstance");
         }
         catch
