@@ -27,15 +27,6 @@ This is a project forked from StS2 Launcher: https://github.com/Ekyso/StS2-Launc
 2. Modified ModLoaderPatches.cs to fully support the new modding format.
 3. Changed the package name, etc. to coexist with StS2 Launcher.
 
-## Engine Patches
-
-Custom patches to the Godot 4.5.1 engine source for Android-specific issues:
-
-- **Vulkan pipeline cache persistence**  
-Saves compiled pipelines when the app loses focus, preventing recompilation after Android kills the process.
-- **Canvas ubershaders**  
-Enable ubershader fallback for 2D rendering, eliminating first-encounter VFX stutters from blocking pipeline compilation.
-
 ## Project Structure
 
 ```
