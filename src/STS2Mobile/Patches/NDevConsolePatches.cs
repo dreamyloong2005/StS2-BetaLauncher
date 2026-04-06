@@ -88,26 +88,6 @@ public static class NDevConsolePatches
             // 6. 最后打印提示
             tr.Method("PrintUsage").GetValue();
 
-            bool hasFullConsole = false;
-            try
-            {
-                // 使用 C# 语法糖 ?. 防止任何一环为 null 导致的崩溃
-                hasFullConsole = SaveManager.Instance?.SettingsSave?.FullConsole ?? false;
-            }
-            catch
-            {
-                /* 如果读取失败，静默忽略并保持 false */
-            }
-
-            bool shouldAllowDebugCommands =
-                OS.HasFeature("editor")
-                || TestMode.IsOn
-                || ModManager.IsRunningModded()
-                || hasFullConsole;
-
-            var devConsole = new MegaCrit.Sts2.Core.DevConsole.DevConsole(shouldAllowDebugCommands);
-            tr.Field("_devConsole").SetValue(devConsole);
-
             return false;
         }
         catch (Exception ex)
