@@ -19,10 +19,6 @@ public static class NDevConsolePatches
     {
         try
         {
-            // ==========================================
-            // 补丁 1：拦截并重写 _Ready() 方法
-            // 解决【初始化顺序异常】与【SaveManager 空指针】
-            // ==========================================
             PatchHelper.Patch(
                 harmony,
                 typeof(NDevConsole),
@@ -40,11 +36,6 @@ public static class NDevConsolePatches
         }
     }
 
-    // =========================================================================
-    // 具体的 Patch 逻辑实现
-    // =========================================================================
-
-    /// 重写 NDevConsole 的 _Ready 方法
     public static bool ReadyPrefix(NDevConsole __instance)
     {
         try
@@ -82,7 +73,6 @@ public static class NDevConsolePatches
                 new Callable(__instance, "OnInputTextChanged")
             );
 
-            // 6. 最后打印提示
             tr.Method("PrintUsage").GetValue();
 
             return false;
