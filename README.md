@@ -2,25 +2,6 @@
 
 This is a project forked from StS2 Launcher: https://github.com/Ekyso/StS2-Launcher
 
-## Features
-
-- **Steam authentication**  
-  Login via SteamKit2 with Steam Guard 2FA support.
-- **STS2 public-beta branch game file download**  
-  Depot download directly from Steam, with update checking.
-- **Cloud saves**  
-  Full Steam cloud sync via SteamKit2's CCloud API, with timestamp-aware conflict resolution and non-blocking background uploads.
-- **Mobile adaptation**  
-  Touch input, UI scaling, layout adjustments, and app lifecycle handling via Harmony runtime patches.
-- **LAN multiplayer**  
-  UDP broadcast discovery and manual IP join.
-- **Shader warmup**  
-  Vulkan pipeline cache persistence and canvas ubershader support to eliminate first-encounter stutters.
-- **Credential security**  
-  Steam refresh tokens encrypted at rest via Android Keystore (AES-256-GCM, hardware-backed TEE).
-- **Full Modding Capability**  
-  Turn on "Local Backup" to load mods from `/storage/emulated/0/StS2BetaLauncher/Mods`.
-
 ## Changes from the original version
 
 1. Modified DepotDownloader.cs to download the latest public-beta version of STS2.
