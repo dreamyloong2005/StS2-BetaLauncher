@@ -65,7 +65,7 @@ Resource pack: 通过网盘分享的文件：StS2BetaLauncherResourcePack.zip
 
 Only for learning use!
 
-1. Git clone the project, extract the resource pack to the root folder, modify the source code as you wish
+1. Git clone the project, extract the resource pack to the root folder, modify the source code as you wish, remember to set the sdk directory in local.properties
 2. `cd StS2-BetaLauncher\src`, `csharpier format .`, `dotnet publish -c Release`, `cd ..\android`
 3. Find `STS2Mobile.dll` in `src\bin\Release\net9.0\publish`
 4. Copy it to `android\assets\dotnet_bcl`
