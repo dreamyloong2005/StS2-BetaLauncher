@@ -5,7 +5,11 @@ using System.Linq;
 using System.Reflection;
 using Godot;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.DevConsole;
 using MegaCrit.Sts2.Core.Modding;
+using MegaCrit.Sts2.Core.Nodes.Debug;
+using MegaCrit.Sts2.Core.Saves;
+using MegaCrit.Sts2.Core.TestSupport;
 
 namespace STS2Mobile.Patches;
 
@@ -258,6 +262,52 @@ public static class ModLoaderPatches
         catch (Exception ex)
         {
             PatchHelper.Log($"[ModLoader] 外部模组注入过程发生致命崩溃: \n{ex}");
+        }
+        CreateAndAssignDevConsole();
+    }
+
+    private static void CreateAndAssignDevConsole()
+    {
+        try
+        {
+            // 获取 NDevConsole 实例（静态属性 Instance）
+            var consoleInstance = NDevConsole.Instance;
+            if (consoleInstance == null)
+            {
+                PatchHelper.Log("[ModLoader] NDevConsole 实例尚未创建，延迟重试");
+                // 延迟一帧再试（因为 _Ready 可能还没执行完）
+                Callable.From(() => CreateAndAssignDevConsole()).CallDeferred();
+                return;
+            }
+
+            // 计算 shouldAllowDebugCommands（与原逻辑一致）
+            bool hasFullConsole = false;
+            try
+            {
+                hasFullConsole = SaveManager.Instance?.SettingsSave?.FullConsole ?? false;
+            }
+            catch { }
+            bool shouldAllowDebugCommands =
+                OS.HasFeature("editor")
+                || TestMode.IsOn
+                || ModManager.IsRunningModded()
+                || hasFullConsole;
+
+            // 创建 DevConsole 实例
+            var devConsole = new DevConsole(shouldAllowDebugCommands);
+
+            // 通过反射赋值给私有字段 _devConsole
+            var field = typeof(NDevConsole).GetField(
+                "_devConsole",
+                BindingFlags.NonPublic | BindingFlags.Instance
+            );
+            field?.SetValue(consoleInstance, devConsole);
+
+            PatchHelper.Log("[ModLoader] DevConsole 已创建并赋值给 NDevConsole");
+        }
+        catch (Exception ex)
+        {
+            PatchHelper.Log($"[ModLoader] 创建 DevConsole 失败: {ex}");
         }
     }
 }
