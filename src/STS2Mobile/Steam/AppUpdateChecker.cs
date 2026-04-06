@@ -10,7 +10,7 @@ namespace STS2Mobile.Steam;
 public static class AppUpdateChecker
 {
     private const string ReleasesUrl =
-        "https://api.github.com/repos/Ekyso/StS2-Launcher/releases/latest";
+        "https://api.github.com/repos/dreamyloong2005/StS2-BetaLauncher/releases/latest";
 
     public static async Task<AppUpdateResult> CheckAsync()
     {
