@@ -263,7 +263,10 @@ public static class ModLoaderPatches
         {
             PatchHelper.Log($"[ModLoader] 外部模组注入过程发生致命崩溃: \n{ex}");
         }
-        CreateAndAssignDevConsole();
+        finally
+        {
+            CreateAndAssignDevConsole();
+        }
     }
 
     private static void CreateAndAssignDevConsole()
