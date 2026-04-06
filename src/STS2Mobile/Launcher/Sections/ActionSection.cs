@@ -26,19 +26,23 @@ public class ActionSection : VBoxContainer
 
     public ActionSection(float scale)
     {
-        _retryButton = new StyledButton("RETRY", scale);
-        _retryButton.Visible = false;
+        _retryButton = new StyledButton("RETRY", scale)
+        {
+            Visible = false
+        };
         _retryButton.Pressed += () => RetryPressed?.Invoke();
         AddChild(_retryButton);
 
         var r = (int)(4 * scale);
-        var bw = System.Math.Max(1, (int)(2 * scale));
+        var bw = Math.Max(1, (int)(2 * scale));
         _offStyle = StyledButton.MakeOutline(new Color(0.7f, 0.25f, 0.25f), r, bw);
         _onStyle = StyledButton.MakeOutline(new Color(0.25f, 0.65f, 0.3f), r, bw);
 
-        _localBackupToggle = new StyledButton("Local Backup: OFF", scale, fontSize: 14, height: 44);
-        _localBackupToggle.ToggleMode = true;
-        _localBackupToggle.Visible = false;
+        _localBackupToggle = new StyledButton("Local Backup: OFF", scale, fontSize: 14, height: 44)
+        {
+            ToggleMode = true,
+            Visible = false
+        };
         ApplyToggleStyle(_localBackupToggle, false);
         _localBackupToggle.Toggled += pressed =>
         {
@@ -48,9 +52,11 @@ public class ActionSection : VBoxContainer
         };
         AddChild(_localBackupToggle);
 
-        _cloudSyncToggle = new StyledButton("Auto Sync: OFF", scale, fontSize: 14, height: 44);
-        _cloudSyncToggle.ToggleMode = true;
-        _cloudSyncToggle.Visible = false;
+        _cloudSyncToggle = new StyledButton("Auto Sync: OFF", scale, fontSize: 14, height: 44)
+        {
+            ToggleMode = true,
+            Visible = false
+        };
         ApplyToggleStyle(_cloudSyncToggle, false);
         _cloudSyncToggle.Toggled += pressed =>
         {
@@ -60,29 +66,39 @@ public class ActionSection : VBoxContainer
         };
         AddChild(_cloudSyncToggle);
 
-        var pushPullRow = new HBoxContainer();
-        pushPullRow.Visible = false;
+        var pushPullRow = new HBoxContainer
+        {
+            Visible = false
+        };
         pushPullRow.AddThemeConstantOverride("separation", (int)(6 * scale));
 
-        _pushButton = new StyledButton("Push to Cloud", scale, fontSize: 14, height: 44);
-        _pushButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        _pushButton = new StyledButton("Push to Cloud", scale, fontSize: 14, height: 44)
+        {
+            SizeFlagsHorizontal = SizeFlags.ExpandFill
+        };
         _pushButton.Pressed += () => CloudPushPressed?.Invoke();
         pushPullRow.AddChild(_pushButton);
 
-        _pullButton = new StyledButton("Pull from Cloud", scale, fontSize: 14, height: 44);
-        _pullButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        _pullButton = new StyledButton("Pull from Cloud", scale, fontSize: 14, height: 44)
+        {
+            SizeFlagsHorizontal = SizeFlags.ExpandFill
+        };
         _pullButton.Pressed += () => CloudPullPressed?.Invoke();
         pushPullRow.AddChild(_pullButton);
 
         AddChild(pushPullRow);
 
-        _updateButton = new StyledButton("CHECK FOR UPDATES", scale, fontSize: 16, height: 48);
-        _updateButton.Visible = false;
+        _updateButton = new StyledButton("CHECK FOR UPDATES", scale, fontSize: 16, height: 48)
+        {
+            Visible = false
+        };
         _updateButton.Pressed += () => CheckForUpdatesPressed?.Invoke();
         AddChild(_updateButton);
 
-        _launchButton = new StyledButton("LAUNCH", scale, fontSize: 16, height: 48);
-        _launchButton.Visible = false;
+        _launchButton = new StyledButton("LAUNCH", scale, fontSize: 16, height: 48)
+        {
+            Visible = false
+        };
         _launchButton.Pressed += () => LaunchPressed?.Invoke();
         AddChild(_launchButton);
     }
