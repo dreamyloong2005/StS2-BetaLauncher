@@ -38,20 +38,26 @@ public class LauncherView
         parent.AddChild(_panel);
         _panelBaseY = _panel.Position.Y;
 
-        var hbox = new HBoxContainer();
-        hbox.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        hbox.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        var hbox = new HBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill
+        };
         hbox.AddThemeConstantOverride("separation", (int)(16 * scale));
         _panel.Content.AddChild(hbox);
 
-        var leftCenter = new CenterContainer();
-        leftCenter.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        leftCenter.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-        leftCenter.SizeFlagsStretchRatio = 1f;
+        var leftCenter = new CenterContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            SizeFlagsStretchRatio = 1f
+        };
         hbox.AddChild(leftCenter);
 
-        var left = new VBoxContainer();
-        left.CustomMinimumSize = new Vector2((int)(200 * scale), 0);
+        var left = new VBoxContainer
+        {
+            CustomMinimumSize = new Vector2((int)(200 * scale), 0)
+        };
         left.AddThemeConstantOverride("separation", (int)(10 * scale));
         leftCenter.AddChild(left);
 
@@ -59,8 +65,10 @@ public class LauncherView
         left.AddChild(title);
         left.AddChild(new HSeparator());
 
-        _statusLabel = new StyledLabel("Initializing...", scale);
-        _statusLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        _statusLabel = new StyledLabel("Initializing...", scale)
+        {
+            AutowrapMode = TextServer.AutowrapMode.WordSmart
+        };
         left.AddChild(_statusLabel);
 
         Login = new LoginSection(scale);
@@ -76,9 +84,11 @@ public class LauncherView
         left.AddChild(Actions);
 
         // FMOD attribution (required by FMOD EULA).
-        var fmodContainer = new VBoxContainer();
-        fmodContainer.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-        fmodContainer.Alignment = BoxContainer.AlignmentMode.End;
+        var fmodContainer = new VBoxContainer
+        {
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            Alignment = BoxContainer.AlignmentMode.End
+        };
         left.AddChild(fmodContainer);
 
         var fmodLogo = LoadFmodLogo(scale);
@@ -93,17 +103,21 @@ public class LauncherView
         fmodCredit.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.55f));
         fmodContainer.AddChild(fmodCredit);
 
-        var right = new VBoxContainer();
-        right.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        right.SizeFlagsStretchRatio = 4f;
+        var right = new VBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsStretchRatio = 4f
+        };
         hbox.AddChild(right);
 
         var logTitle = new StyledLabel("Console", scale, fontSize: 14);
         logTitle.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.65f));
         right.AddChild(logTitle);
 
-        Log = new LogView(scale);
-        Log.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        Log = new LogView(scale)
+        {
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill
+        };
         Log.GuiInput += DismissKeyboard;
         right.AddChild(Log);
     }
