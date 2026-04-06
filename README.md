@@ -99,7 +99,9 @@ bash scripts/build-godot.sh
 
 # Rebuild native stubs (requires Android NDK)
 bash src/stubs/build_stubs.sh
+```
 
+```bash
 ## License
 
 This project is licensed under the [MIT License](LICENSE). See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for third-party dependency licenses.
