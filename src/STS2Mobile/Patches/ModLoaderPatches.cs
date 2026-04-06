@@ -117,7 +117,7 @@ public static class ModLoaderPatches
                 return;
 
             // ==================== 【关键修复】 ====================
-            // 获取 settings 和 ModList 属性（提前声明，供后面复用）
+            // 获取 settings 和 ModList 属性
             var settingsField = typeof(ModManager).GetField("_settings", AllStatic);
             var settings = settingsField?.GetValue(null);
 
@@ -129,10 +129,13 @@ public static class ModLoaderPatches
             var settingsSaveModType = typeof(ModManager).Assembly.GetType(
                 "MegaCrit.Sts2.Core.Modding.SettingsSaveMod"
             );
-
-            // 把新发现的模组加入 _settings.ModList 并设为 Enabled
-            if (settings != null && newModsList.Count > 0 && settingsSaveModType != null)
+            if (settingsSaveModType == null)
             {
+                PatchHelper.Log("[ModLoader] 无法找到 SettingsSaveMod 类型，跳过设置更新");
+            }
+            else if (settings != null && newModsList.Count > 0)
+            {
+                // 如果 ModList 为空，创建一个新的
                 if (modList == null)
                 {
                     var listType = typeof(List<>).MakeGenericType(settingsSaveModType);
@@ -142,29 +145,76 @@ public static class ModLoaderPatches
                 var addMethod = modList
                     .GetType()
                     .GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
+                var idProp = settingsSaveModType.GetProperty(
+                    "Id",
+                    BindingFlags.Public | BindingFlags.Instance
+                );
                 var isEnabledProp = settingsSaveModType.GetProperty(
                     "IsEnabled",
                     BindingFlags.Public | BindingFlags.Instance
                 );
 
+                // 1. 先收集当前设置里已有的模组 ID（避免重复添加）
+                var existingIds = new HashSet<string>();
+                if (modList != null && idProp != null)
+                {
+                    var countProp = modList.GetType().GetProperty("Count");
+                    int count = (int)(countProp?.GetValue(modList) ?? 0);
+                    var itemProp = modList.GetType().GetProperty("Item", new[] { typeof(int) });
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        var entry = itemProp?.GetValue(modList, new object[] { i });
+                        if (entry != null)
+                        {
+                            var id = idProp.GetValue(entry) as string;
+                            if (!string.IsNullOrEmpty(id))
+                                existingIds.Add(id);
+                        }
+                    }
+                }
+
+                // 2. 只对“全新”模组（设置里不存在的）才添加并默认 Enabled=true
+                //    已存在的模组保持玩家原来的 IsEnabled 设置（不覆盖）
+                int newlyAdded = 0;
                 foreach (var newMod in newModsList)
                 {
                     if (newMod.manifest?.id == null)
                         continue;
 
+                    string modId = newMod.manifest.id;
+
+                    if (existingIds.Contains(modId))
+                    {
+                        PatchHelper.Log(
+                            $"[ModLoader] 模组 {modId} 已存在于设置中，保留玩家原有启用/禁用状态"
+                        );
+                        continue;
+                    }
+
+                    // 新模组 → 添加并默认启用
                     var settingsSaveMod = Activator.CreateInstance(
                         settingsSaveModType,
                         new object[] { newMod }
                     );
                     isEnabledProp?.SetValue(settingsSaveMod, true);
 
-                    addMethod?.Invoke(modList, [settingsSaveMod]);
+                    addMethod?.Invoke(modList, new object[] { settingsSaveMod });
+                    existingIds.Add(modId); // 防止重复
+                    newlyAdded++;
                 }
 
-                modListProp?.SetValue(settings, modList);
-                PatchHelper.Log(
-                    $"[ModLoader] 已将 {newModsList.Count} 个新模组加入设置列表（Enabled=true）"
-                );
+                if (newlyAdded > 0)
+                {
+                    modListProp?.SetValue(settings, modList);
+                    PatchHelper.Log(
+                        $"[ModLoader] 已将 {newlyAdded} 个**全新**模组加入设置列表（Enabled=true），玩家已禁用的模组保持不变"
+                    );
+                }
+                else
+                {
+                    PatchHelper.Log("[ModLoader] 所有扫描到的模组都已在设置列表中，无需新增");
+                }
             }
             // ========================================================
 
