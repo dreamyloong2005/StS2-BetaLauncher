@@ -2,7 +2,7 @@
 
 This is a project forked from StS2 Launcher: https://github.com/Ekyso/StS2-Launcher
 
-## Changes from the original version
+## Changes compared with the original version
 
 1. Modified DepotDownloader.cs to download the latest public-beta version of STS2.
 2. Modified ModLoaderPatches.cs to fully support the new modding format.
