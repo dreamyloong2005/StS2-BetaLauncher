@@ -2,7 +2,11 @@ using System;
 using System.Reflection;
 using Godot;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.DevConsole;
+using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Nodes.Debug;
+using MegaCrit.Sts2.Core.Saves;
+using MegaCrit.Sts2.Core.TestSupport;
 
 namespace STS2Mobile.Patches;
 
@@ -15,116 +19,101 @@ public static class NDevConsolePatches
     {
         try
         {
-            // 使用 PatchHelper.Patch 简洁风格注入三个前缀补丁
+            // ==========================================
+            // 补丁 1：拦截并重写 _Ready() 方法
+            // 解决【初始化顺序异常】与【SaveManager 空指针】
+            // ==========================================
             PatchHelper.Patch(
                 harmony,
                 typeof(NDevConsole),
-                "UpdateGhostText",
-                prefix: PatchHelper.Method(
-                    typeof(NDevConsolePatches),
-                    nameof(UpdateGhostTextPrefix)
-                )
-            );
-            PatchHelper.Patch(
-                harmony,
-                typeof(NDevConsole),
-                "ProcessCommand",
-                prefix: PatchHelper.Method(typeof(NDevConsolePatches), nameof(ProcessCommandPrefix))
-            );
-            PatchHelper.Patch(
-                harmony,
-                typeof(NDevConsole),
-                "OnInputTextChanged",
-                prefix: PatchHelper.Method(
-                    typeof(NDevConsolePatches),
-                    nameof(OnInputTextChangedPrefix)
-                )
+                nameof(NDevConsole._Ready),
+                prefix: PatchHelper.Method(typeof(NDevConsolePatches), nameof(ReadyPrefix))
             );
 
-            PatchHelper.Log("[NDevConsolePatch] 成功注入 NDevConsole 空值检查补丁！");
+            PatchHelper.Log(
+                "[NDevConsolePatch] 成功注入【运行时自修复】补丁（已解决移动端初始化时序问题）！"
+            );
         }
         catch (Exception ex)
         {
-            PatchHelper.Log("[NDevConsolePatch] 补丁注入失败: " + ex.ToString());
+            PatchHelper.Log("[NDevConsolePatch] 补丁注入失败: " + ex);
         }
     }
 
-    // ========== 补丁方法必须为 public static（供 PatchHelper.Method 调用） ==========
+    // =========================================================================
+    // 具体的 Patch 逻辑实现
+    // =========================================================================
 
-    // UpdateGhostText 的前缀检查
-    public static bool UpdateGhostTextPrefix(NDevConsole __instance)
+    /// <summary>
+    /// 重写 NDevConsole 的 _Ready 方法
+    /// </summary>
+    public static bool ReadyPrefix(NDevConsole __instance)
     {
         try
         {
-            var inputBuffer = GetPrivateField<LineEdit>(__instance, "_inputBuffer");
-            var ghostLabel = GetPrivateField<Label>(__instance, "_ghostTextLabel");
-            var devConsole = GetPrivateField<object>(__instance, "_devConsole");
+            var tr = Traverse.Create(__instance);
 
-            if (inputBuffer == null || ghostLabel == null || devConsole == null)
+            var outputBuffer = __instance.GetNode<RichTextLabel>("OutputContainer/OutputBuffer");
+            var tabBuffer = __instance.GetNode<RichTextLabel>("OutputContainer/TabBuffer");
+            var inputContainer = __instance.GetNode<Control>("InputContainer");
+            var inputBuffer = __instance.GetNode<LineEdit>(
+                "InputContainer/InputBufferContainer/InputBuffer"
+            );
+            var promptLabel = __instance.GetNode<Label>("InputContainer/PromptLabel");
+            var ghostTextLabel = __instance.GetNode<Label>(
+                "InputContainer/InputBufferContainer/GhostText"
+            );
+
+            tr.Field("_outputBuffer").SetValue(outputBuffer);
+            tr.Field("_tabBuffer").SetValue(tabBuffer);
+            tr.Field("_inputContainer").SetValue(inputContainer);
+            tr.Field("_inputBuffer").SetValue(inputBuffer);
+            tr.Field("_promptLabel").SetValue(promptLabel);
+            tr.Field("_ghostTextLabel").SetValue(ghostTextLabel);
+
+            __instance.HideConsole();
+            __instance.MakeHalfScreen();
+            tr.Method("DisableTabBuffer").GetValue();
+            tr.Method("HideGhostText").GetValue();
+            inputBuffer.CaretBlink = true;
+            tr.Method("UpdatePromptStyle").GetValue();
+
+            // 绑定事件：此时 _devConsole 已确定存在，不会再发生时序崩溃
+            // 采用 Godot 4 原生的 Connect + Callable 方式，规避反射私有委托（+=）带来的复杂性
+            inputBuffer.Connect(
+                LineEdit.SignalName.TextChanged,
+                new Callable(__instance, "OnInputTextChanged")
+            );
+
+            // 6. 最后打印提示
+            tr.Method("PrintUsage").GetValue();
+
+            bool hasFullConsole = false;
+            try
             {
-                return false; // 跳过原方法
+                // 使用 C# 语法糖 ?. 防止任何一环为 null 导致的崩溃
+                hasFullConsole = SaveManager.Instance?.SettingsSave?.FullConsole ?? false;
             }
-            return true;
-        }
-        catch
-        {
+            catch
+            {
+                /* 如果读取失败，静默忽略并保持 false */
+            }
+
+            bool shouldAllowDebugCommands =
+                OS.HasFeature("editor")
+                || TestMode.IsOn
+                || ModManager.IsRunningModded()
+                || hasFullConsole;
+
+            var devConsole = new MegaCrit.Sts2.Core.DevConsole.DevConsole(shouldAllowDebugCommands);
+            tr.Field("_devConsole").SetValue(devConsole);
+
             return false;
         }
-    }
-
-    // ProcessCommand 的前缀检查
-    public static bool ProcessCommandPrefix(NDevConsole __instance)
-    {
-        try
+        catch (Exception ex)
         {
-            var inputBuffer = GetPrivateField<LineEdit>(__instance, "_inputBuffer");
-            var outputBuffer = GetPrivateField<RichTextLabel>(__instance, "_outputBuffer");
-            var devConsole = GetPrivateField<object>(__instance, "_devConsole");
-
-            if (inputBuffer == null || outputBuffer == null || devConsole == null)
-            {
-                return false;
-            }
+            GD.PushError($"NDevConsole _Ready Prefix 异常: {ex}");
             return true;
         }
-        catch
-        {
-            return false;
-        }
-    }
-
-    // OnInputTextChanged 的前缀检查
-    public static bool OnInputTextChangedPrefix(NDevConsole __instance, string newText)
-    {
-        try
-        {
-            var inputBuffer = GetPrivateField<LineEdit>(__instance, "_inputBuffer");
-            var ghostLabel = GetPrivateField<Label>(__instance, "_ghostTextLabel");
-            var devConsole = GetPrivateField<object>(__instance, "_devConsole");
-
-            if (inputBuffer == null || ghostLabel == null || devConsole == null)
-            {
-                return false;
-            }
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    // 辅助方法：获取私有字段值（保持原样，可保留 private）
-    private static T GetPrivateField<T>(object instance, string fieldName)
-    {
-        if (instance == null)
-            return default;
-        var field = instance
-            .GetType()
-            .GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-        if (field == null)
-            return default;
-        var value = field.GetValue(instance);
-        return value is T t ? t : default;
     }
 }
