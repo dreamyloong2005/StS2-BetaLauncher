@@ -55,7 +55,7 @@ public class LauncherView
         left.AddThemeConstantOverride("separation", (int)(10 * scale));
         leftCenter.AddChild(left);
 
-        var title = new StyledLabel("StS2 Launcher", scale, fontSize: 26);
+        var title = new StyledLabel("StS2 BetaLauncher", scale, fontSize: 26);
         left.AddChild(title);
         left.AddChild(new HSeparator());
 
