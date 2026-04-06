@@ -120,7 +120,6 @@ public static class ModLoaderPatches
             if (newModsList.Count == 0)
                 return;
 
-            // ==================== 【关键修复】 ====================
             // 获取 settings 和 ModList 属性
             var settingsField = typeof(ModManager).GetField("_settings", AllStatic);
             var settings = settingsField?.GetValue(null);
@@ -220,7 +219,6 @@ public static class ModLoaderPatches
                     PatchHelper.Log("[ModLoader] 所有扫描到的模组都已在设置列表中，无需新增");
                 }
             }
-            // ========================================================
 
             // 4. 突破运行时限制：临时将 _initialized 设为 false
             var initField = typeof(ModManager).GetField("_initialized", AllStatic);
