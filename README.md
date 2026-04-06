@@ -60,7 +60,9 @@ If one prerequisite is optional, then it is techically unnecessary if you only w
 
 **Note: The tutorial is only intended to generate installable an apk, if you want to compile all components yourself, see the README.md in the original repo. (In my test, it seemed almost impossible under a Windows environment.)** 
 
-Resource pack: 通过网盘分享的文件：StS2BetaLauncherResourcePack.zip
+Resource pack:
+
+通过网盘分享的文件：StS2BetaLauncherResourcePack.zip
 链接: https://pan.baidu.com/s/1StR0xKRUrMl0o2m8EhlaxA?pwd=y7w2 提取码: y7w2
 
 Only for learning use!
