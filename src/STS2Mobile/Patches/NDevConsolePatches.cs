@@ -44,9 +44,7 @@ public static class NDevConsolePatches
     // 具体的 Patch 逻辑实现
     // =========================================================================
 
-    /// <summary>
     /// 重写 NDevConsole 的 _Ready 方法
-    /// </summary>
     public static bool ReadyPrefix(NDevConsole __instance)
     {
         try
@@ -78,7 +76,6 @@ public static class NDevConsolePatches
             inputBuffer.CaretBlink = true;
             tr.Method("UpdatePromptStyle").GetValue();
 
-            // 绑定事件：此时 _devConsole 已确定存在，不会再发生时序崩溃
             // 采用 Godot 4 原生的 Connect + Callable 方式，规避反射私有委托（+=）带来的复杂性
             inputBuffer.Connect(
                 LineEdit.SignalName.TextChanged,
