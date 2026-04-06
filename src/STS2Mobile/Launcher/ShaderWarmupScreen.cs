@@ -100,15 +100,19 @@ public class ShaderWarmupScreen : Control
         _statusLabel = new StyledLabel("Compiling shaders...", _scale, fontSize: 20);
         panel.Content.AddChild(_statusLabel);
 
-        _progressBar = new StyledProgressBar(_scale);
-        _progressBar.MinValue = 0;
-        _progressBar.MaxValue = 100;
-        _progressBar.Value = 0;
-        _progressBar.ShowPercentage = true;
+        _progressBar = new StyledProgressBar(_scale)
+        {
+            MinValue = 0,
+            MaxValue = 100,
+            Value = 0,
+            ShowPercentage = true
+        };
         panel.Content.AddChild(_progressBar);
 
-        _detailLabel = new StyledLabel("Enumerating resources...", _scale, fontSize: 12);
-        _detailLabel.Modulate = new Color(0.7f, 0.7f, 0.7f);
+        _detailLabel = new StyledLabel("Enumerating resources...", _scale, fontSize: 12)
+        {
+            Modulate = new Color(0.7f, 0.7f, 0.7f)
+        };
         panel.Content.AddChild(_detailLabel);
     }
 
@@ -133,10 +137,12 @@ public class ShaderWarmupScreen : Control
                 return;
             }
 
-            var viewport = new SubViewport();
-            viewport.Size = new Vector2I(64, 64);
-            viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
-            viewport.TransparentBg = true;
+            var viewport = new SubViewport
+            {
+                Size = new Vector2I(64, 64),
+                RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
+                TransparentBg = true
+            };
             AddChild(viewport);
 
             var whiteImage = Image.CreateEmpty(1, 1, false, Image.Format.Rgba8);
@@ -208,18 +214,22 @@ public class ShaderWarmupScreen : Control
     {
         if (mat is ParticleProcessMaterial particleMat)
         {
-            var particles = new GpuParticles2D();
-            particles.ProcessMaterial = particleMat;
-            particles.Amount = 1;
-            particles.Emitting = true;
-            particles.OneShot = false;
-            particles.Texture = whiteTex;
+            var particles = new GpuParticles2D
+            {
+                ProcessMaterial = particleMat,
+                Amount = 1,
+                Emitting = true,
+                OneShot = false,
+                Texture = whiteTex
+            };
             return particles;
         }
 
-        var sprite = new Sprite2D();
-        sprite.Texture = whiteTex;
-        sprite.Material = mat;
+        var sprite = new Sprite2D
+        {
+            Texture = whiteTex,
+            Material = mat
+        };
         return sprite;
     }
 
@@ -334,26 +344,24 @@ public class ShaderWarmupScreen : Control
                     // Load .tres with type hints to avoid errors from non-material resources.
                     if (cleanName.EndsWith(".tres"))
                     {
-                        var mat =
-                            ResourceLoader.Load(
+                        if (ResourceLoader.Load(
                                 cleanPath,
                                 "Material",
                                 ResourceLoader.CacheMode.Reuse
-                            ) as Material;
-                        if (mat != null)
+                            ) is Material mat)
                             materials[cleanPath] = mat;
                         else
                         {
-                            var shader =
-                                ResourceLoader.Load(
+                            if (ResourceLoader.Load(
                                     cleanPath,
                                     "Shader",
                                     ResourceLoader.CacheMode.Reuse
-                                ) as Shader;
-                            if (shader != null)
+                                ) is Shader shader)
                             {
-                                var shaderMat = new ShaderMaterial();
-                                shaderMat.Shader = shader;
+                                var shaderMat = new ShaderMaterial
+                                {
+                                    Shader = shader
+                                };
                                 materials[cleanPath] = shaderMat;
                             }
                         }
@@ -367,8 +375,10 @@ public class ShaderWarmupScreen : Control
                     }
                     else if (res is Shader resShader)
                     {
-                        var shaderMat = new ShaderMaterial();
-                        shaderMat.Shader = resShader;
+                        var shaderMat = new ShaderMaterial
+                        {
+                            Shader = resShader
+                        };
                         materials[cleanPath] = shaderMat;
                     }
                 }
