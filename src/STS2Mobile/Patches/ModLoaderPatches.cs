@@ -73,10 +73,10 @@ public static class ModLoaderPatches
                 );
             }
 
-            // 2. 保底方案：使用 Godot 沙盒目录 user://mods
+            // 2. 保底方案：使用 Godot 沙盒目录 user://game/mods
             if (string.IsNullOrEmpty(targetDir))
             {
-                string fallbackDir = "user://mods";
+                string fallbackDir = "user://game/mods";
                 string globalFallback = ProjectSettings.GlobalizePath(fallbackDir);
                 PatchHelper.Log($"[ModLoader] 尝试使用沙盒保底目录: {globalFallback}");
 
@@ -116,30 +116,73 @@ public static class ModLoaderPatches
             if (newModsList.Count == 0)
                 return;
 
+            // ==================== 【关键修复】 ====================
+            // 获取 settings 和 ModList 属性（提前声明，供后面复用）
+            var settingsField = typeof(ModManager).GetField("_settings", AllStatic);
+            var settings = settingsField?.GetValue(null);
+
+            var modListProp = settings
+                ?.GetType()
+                .GetProperty("ModList", BindingFlags.Public | BindingFlags.Instance);
+            object modList = modListProp?.GetValue(settings);
+
+            var settingsSaveModType = typeof(ModManager).Assembly.GetType(
+                "MegaCrit.Sts2.Core.Modding.SettingsSaveMod"
+            );
+
+            // 把新发现的模组加入 _settings.ModList 并设为 Enabled
+            if (settings != null && newModsList.Count > 0 && settingsSaveModType != null)
+            {
+                if (modList == null)
+                {
+                    var listType = typeof(List<>).MakeGenericType(settingsSaveModType);
+                    modList = Activator.CreateInstance(listType);
+                }
+
+                var addMethod = modList
+                    .GetType()
+                    .GetMethod("Add", BindingFlags.Public | BindingFlags.Instance);
+                var isEnabledProp = settingsSaveModType.GetProperty(
+                    "IsEnabled",
+                    BindingFlags.Public | BindingFlags.Instance
+                );
+
+                foreach (var newMod in newModsList)
+                {
+                    if (newMod.manifest?.id == null)
+                        continue;
+
+                    var settingsSaveMod = Activator.CreateInstance(
+                        settingsSaveModType,
+                        new object[] { newMod }
+                    );
+                    isEnabledProp?.SetValue(settingsSaveMod, true);
+
+                    addMethod?.Invoke(modList, [settingsSaveMod]);
+                }
+
+                modListProp?.SetValue(settings, modList);
+                PatchHelper.Log(
+                    $"[ModLoader] 已将 {newModsList.Count} 个新模组加入设置列表（Enabled=true）"
+                );
+            }
+            // ========================================================
+
             // 4. 突破运行时限制：临时将 _initialized 设为 false
             var initField = typeof(ModManager).GetField("_initialized", AllStatic);
             initField?.SetValue(null, false);
 
             // 5. 重新排序模组（解决依赖关系）
             var sortMethod = typeof(ModManager).GetMethod("SortModList", AllStatic);
-            var settingsField = typeof(ModManager).GetField("_settings", AllStatic);
-            var settings = settingsField?.GetValue(null);
-            object modList = settings
-                ?.GetType()
-                .GetProperty("ModList", BindingFlags.Public | BindingFlags.Instance)
-                ?.GetValue(settings);
-
-            if (modList == null)
+            object modListForSort = modList; // 直接复用上面已经处理好的列表
+            if (modListForSort == null)
             {
-                var settingsSaveModType = typeof(ModManager).Assembly.GetType(
-                    "MegaCrit.Sts2.Core.Modding.SettingsSaveMod"
-                );
                 var listType = typeof(List<>).MakeGenericType(settingsSaveModType);
-                modList = Activator.CreateInstance(listType);
+                modListForSort = Activator.CreateInstance(listType);
             }
 
             PatchHelper.Log("[ModLoader] 正在重新整理模组依赖链...");
-            sortMethod?.Invoke(null, new object[] { modList });
+            sortMethod?.Invoke(null, new object[] { modListForSort });
 
             // 6. 执行模组加载
             var tryLoadMethod = typeof(ModManager).GetMethod("TryLoadMod", AllStatic);
