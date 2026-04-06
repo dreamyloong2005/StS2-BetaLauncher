@@ -27,8 +27,10 @@ public class LauncherUI : Control
             Size = vpSize;
             var scale = Math.Max(vpSize.X, vpSize.Y) / 960f;
 
-            _model = new LauncherModel(OS.GetDataDir());
-            _model.InGameMode = _inGameMode;
+            _model = new LauncherModel(OS.GetDataDir())
+            {
+                InGameMode = _inGameMode
+            };
             _view = new LauncherView(this, scale);
             _controller = new LauncherController(_model, _view, a => _mainThreadQueue.Enqueue(a));
 
