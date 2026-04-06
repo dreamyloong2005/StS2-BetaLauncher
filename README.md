@@ -66,12 +66,12 @@ Resource pack: 通过网盘分享的文件：StS2BetaLauncherResourcePack.zip
 Only for learning use!
 
 1. Git clone the project, extract the resource pack to the root folder, modify the source code as you wish, remember to set the sdk directory in android\local.properties
-2. `cd StS2-BetaLauncher\src`, `csharpier format .`, `dotnet publish -c Release`, `cd ..\android`
-3. Find `STS2Mobile.dll` in `src\bin\Release\net9.0\publish`
+2. `cd StS2-BetaLauncher\src\`, `csharpier format .`, `dotnet publish -c Release`, `cd ..\android\`
+3. Find `STS2Mobile.dll` in `src\bin\Release\net9.0\publish\`
 4. Copy it to `android\assets\dotnet_bcl`
 5. Put precompiled assets in the same folder.
-6. Put `fmod.jar` and `godot-lib.4.5.1.stable.template_release.aar` in `android\libs\release`
-7. Put .so libs in `android\libs\release\arm64-v8a`
+6. Put `fmod.jar` and `godot-lib.4.5.1.stable.template_release.aar` in `android\libs\release\`
+7. Put .so libs in `android\libs\release\arm64-v8a\`
 8. `gradle wrapper` (Optional, if you want to regenerate gradlew.bat)
 9. `.\gradle clean`, `.\gradlew assembleMonoRelease`
 
