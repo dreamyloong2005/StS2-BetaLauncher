@@ -19,8 +19,10 @@ public class CodeSection : VBoxContainer
         _codeLabel = new StyledLabel("Enter Steam Guard code", scale, fontSize: 14);
         AddChild(_codeLabel);
 
-        _codeField = new StyledLineEdit("Code", scale);
-        _codeField.MaxLength = 10;
+        _codeField = new StyledLineEdit("Code", scale)
+        {
+            MaxLength = 10
+        };
         _codeField.TextSubmitted += _ => OnSubmit();
         AddChild(_codeField);
 
