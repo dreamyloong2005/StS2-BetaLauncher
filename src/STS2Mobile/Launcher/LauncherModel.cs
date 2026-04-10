@@ -345,8 +345,6 @@ public class LauncherModel : IDisposable
     public static bool GameFilesReady()
     {
         var pckPath = "/storage/emulated/0/StS2BetaLauncher/game/SlayTheSpire2.pck";
-
-        DepotDownloader.PatchIfNeeded(pckPath);
         
         try
         {
