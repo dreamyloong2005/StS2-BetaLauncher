@@ -324,12 +324,6 @@ public class LauncherController
 
     private void OnLocalBackupToggled(bool pressed)
     {
-        if (pressed && !AppPaths.HasStoragePermission())
-            AppPaths.RequestStoragePermission();
-
-        if (pressed)
-            AppPaths.EnsureExternalDirectories();
-
         LauncherModel.SaveLocalBackupPref(pressed);
         CloudSyncCoordinator.LocalBackupEnabled = pressed;
     }
