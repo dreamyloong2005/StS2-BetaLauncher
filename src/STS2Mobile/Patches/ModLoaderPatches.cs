@@ -202,7 +202,7 @@ public static class ModLoaderPatches
                     );
                     isEnabledProp?.SetValue(settingsSaveMod, true);
 
-                    addMethod?.Invoke(modList, new object[] { settingsSaveMod });
+                    addMethod?.Invoke(modList, [settingsSaveMod]);
                     existingIds.Add(modId); // 防止重复
                     newlyAdded++;
                 }
@@ -263,7 +263,7 @@ public static class ModLoaderPatches
         }
         finally
         {
-            CreateAndAssignDevConsole();
+            // CreateAndAssignDevConsole();
         }
     }
 
