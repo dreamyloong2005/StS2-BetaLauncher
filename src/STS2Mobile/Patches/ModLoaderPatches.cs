@@ -198,7 +198,7 @@ public static class ModLoaderPatches
                     // 新模组 → 添加并默认启用
                     var settingsSaveMod = Activator.CreateInstance(
                         settingsSaveModType,
-                        new object[] { newMod }
+                        [newMod]
                     );
                     isEnabledProp?.SetValue(settingsSaveMod, true);
 
@@ -263,7 +263,7 @@ public static class ModLoaderPatches
         }
         finally
         {
-            // CreateAndAssignDevConsole();
+            CreateAndAssignDevConsole();
         }
     }
 
