@@ -41,11 +41,11 @@ public class DepotDownloader : IDisposable
     private readonly Dictionary<
         (uint DepotId, string Branch),
         (ulong Code, DateTime Expiry)
-    > _manifestRequestCodes = new();
+    > _manifestRequestCodes = [];
     private readonly Dictionary<
         uint,
         SteamApps.PICSProductInfoCallback.PICSProductInfo
-    > _appInfoCache = new();
+    > _appInfoCache = [];
 
     public event Action<DownloadProgress> ProgressChanged;
     public event Action<string> LogMessage;
@@ -53,7 +53,7 @@ public class DepotDownloader : IDisposable
     public DepotDownloader(SteamConnection connection, string dataDir)
     {
         _connection = connection;
-        _gameDir = Path.Combine(dataDir, "game");
+        _gameDir = Path.Combine(AppPaths.ExternalRoot, "game");
         _stateDir = Path.Combine(dataDir, "download_state");
         _cdnClient = new Client(connection.Client);
     }
@@ -118,8 +118,8 @@ public class DepotDownloader : IDisposable
 
             ulong accessToken = _connection.AppAccessToken;
             var infoResult = await _connection.Apps.PICSGetProductInfo(
-                new[] { new SteamApps.PICSRequest(AppId, accessToken) },
-                Enumerable.Empty<SteamApps.PICSRequest>()
+                [new SteamApps.PICSRequest(AppId, accessToken)],
+                []
             );
 
             SteamApps.PICSProductInfoCallback.PICSProductInfo appInfo = null;
@@ -132,10 +132,7 @@ public class DepotDownloader : IDisposable
                 }
             }
 
-            if (appInfo == null)
-                throw new Exception("Failed to get app info from Steam");
-
-            _appInfoCache[AppId] = appInfo;
+            _appInfoCache[AppId] = appInfo ?? throw new Exception("Failed to get app info from Steam");
             var depotSection = appInfo.KeyValues["depots"];
             var depots = await ParseDepotsAsync(depotSection);
             if (depots.Count == 0)
@@ -166,8 +163,6 @@ public class DepotDownloader : IDisposable
             }
 
             Log("All game files downloaded!");
-
-            //PatchGamePck(Path.Combine(_gameDir, "SlayTheSpire2.pck"));
         }
         finally
         {
@@ -749,10 +744,10 @@ public class DepotDownloader : IDisposable
         return $"{bytes} B";
     }
 
-    public static void PatchGamePck(string pckPath)
+    public static bool PatchGamePck(string pckPath)
     {
         if (!File.Exists(pckPath))
-            return;
+            return false;
 
         try
         {
@@ -761,7 +756,7 @@ public class DepotDownloader : IDisposable
 
             uint magic = reader.ReadUInt32();
             if (magic != 0x43504447)
-                return;
+                return false;
 
             uint formatVersion = reader.ReadUInt32();
             reader.ReadUInt32();
@@ -798,10 +793,36 @@ public class DepotDownloader : IDisposable
 
             if (patched)
                 PatchHelper.Log("Patched game PCK: removed Sentry plugin references");
+            return patched;
         }
         catch (Exception ex)
         {
             PatchHelper.Log($"PCK patching failed (non-fatal): {ex.Message}");
+            return false;
+        }
+    }
+
+    public static bool PatchIfNeeded(string pckPath)
+    {
+        if (!File.Exists(pckPath))
+            return false;
+
+        string markerPath = pckPath + ".patched";
+        if (File.Exists(markerPath))
+            return false;
+
+        try
+        {
+            bool patched = PatchGamePck(pckPath);
+            if (patched)
+            {
+                File.Create(markerPath).Dispose();
+            }
+            return patched;
+        }
+        catch (Exception ex)
+        {
+            return false;
         }
     }
 
