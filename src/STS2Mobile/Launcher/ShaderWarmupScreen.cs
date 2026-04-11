@@ -105,13 +105,13 @@ public class ShaderWarmupScreen : Control
             MinValue = 0,
             MaxValue = 100,
             Value = 0,
-            ShowPercentage = true
+            ShowPercentage = true,
         };
         panel.Content.AddChild(_progressBar);
 
         _detailLabel = new StyledLabel("Enumerating resources...", _scale, fontSize: 12)
         {
-            Modulate = new Color(0.7f, 0.7f, 0.7f)
+            Modulate = new Color(0.7f, 0.7f, 0.7f),
         };
         panel.Content.AddChild(_detailLabel);
     }
@@ -133,15 +133,14 @@ public class ShaderWarmupScreen : Control
             if (materials.Count == 0)
             {
                 WriteVersionMarker();
-                _tcs?.TrySetResult(true);
-                return;
+                LauncherModel.GetGodotApp()?.Call("restartApp");
             }
 
             var viewport = new SubViewport
             {
                 Size = new Vector2I(64, 64),
                 RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
-                TransparentBg = true
+                TransparentBg = true,
             };
             AddChild(viewport);
 
@@ -207,7 +206,7 @@ public class ShaderWarmupScreen : Control
             PatchHelper.Log($"[ShaderWarmup] Failed: {ex}");
         }
 
-        _tcs?.TrySetResult(true);
+        LauncherModel.GetGodotApp()?.Call("restartApp");
     }
 
     private static Node CreateWarmupNode(Material mat, ImageTexture whiteTex)
@@ -220,16 +219,12 @@ public class ShaderWarmupScreen : Control
                 Amount = 1,
                 Emitting = true,
                 OneShot = false,
-                Texture = whiteTex
+                Texture = whiteTex,
             };
             return particles;
         }
 
-        var sprite = new Sprite2D
-        {
-            Texture = whiteTex,
-            Material = mat
-        };
+        var sprite = new Sprite2D { Texture = whiteTex, Material = mat };
         return sprite;
     }
 
@@ -344,24 +339,27 @@ public class ShaderWarmupScreen : Control
                     // Load .tres with type hints to avoid errors from non-material resources.
                     if (cleanName.EndsWith(".tres"))
                     {
-                        if (ResourceLoader.Load(
+                        if (
+                            ResourceLoader.Load(
                                 cleanPath,
                                 "Material",
                                 ResourceLoader.CacheMode.Reuse
-                            ) is Material mat)
+                            )
+                            is Material mat
+                        )
                             materials[cleanPath] = mat;
                         else
                         {
-                            if (ResourceLoader.Load(
+                            if (
+                                ResourceLoader.Load(
                                     cleanPath,
                                     "Shader",
                                     ResourceLoader.CacheMode.Reuse
-                                ) is Shader shader)
+                                )
+                                is Shader shader
+                            )
                             {
-                                var shaderMat = new ShaderMaterial
-                                {
-                                    Shader = shader
-                                };
+                                var shaderMat = new ShaderMaterial { Shader = shader };
                                 materials[cleanPath] = shaderMat;
                             }
                         }
@@ -375,10 +373,7 @@ public class ShaderWarmupScreen : Control
                     }
                     else if (res is Shader resShader)
                     {
-                        var shaderMat = new ShaderMaterial
-                        {
-                            Shader = resShader
-                        };
+                        var shaderMat = new ShaderMaterial { Shader = resShader };
                         materials[cleanPath] = shaderMat;
                     }
                 }
