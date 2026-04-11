@@ -739,5 +739,6 @@ public class DepotDownloader(SteamConnection connection, string dataDir) : IDisp
     public void Dispose()
     {
         _cdnClient?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
