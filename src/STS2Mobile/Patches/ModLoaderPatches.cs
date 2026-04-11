@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Godot;
@@ -66,8 +64,9 @@ public static class ModLoaderPatches
             // 后面是 call Path.Combine + stloc path
             matcher.Advance(-1);                    // 退到 ldloc directoryName
             matcher.RemoveInstructions(3);          // 删除：ldloc directoryName + ldstr "mods" + call Path.Combine
+            var getter = AccessTools.PropertyGetter(typeof(AppPaths), nameof(AppPaths.ExternalModsDir));
             matcher.InsertAndAdvance(
-                new CodeInstruction(OpCodes.Ldstr, "/storage/emulated/0/StS2BetaLauncher/Mods")
+                new CodeInstruction(OpCodes.Ldstr, getter)
             );
             // 现在 stloc path 会直接存入我们硬编码的完整路径
         }
