@@ -204,6 +204,7 @@ public class SteamConnection : IDisposable
         Flush();
         _sendLock.Dispose();
         _connectedGate.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void EnsureConnected()
