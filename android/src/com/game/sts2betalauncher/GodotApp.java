@@ -57,6 +57,7 @@ public class GodotApp extends GodotActivity {
 	private static final String PCK_FILE = "SlayTheSpire2.pck";
 	private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final int REQUEST_MANAGE_STORAGE = 2;
+	public static String ExternalRoot = "/storage/emulated/0/StS2BetaLauncher";
 
 	private final Runnable updateWindowAppearance = () -> {
 		Godot godot = getGodot();
@@ -67,10 +68,14 @@ public class GodotApp extends GodotActivity {
 		}
 	};
 
+	public String GetExternalRoot() {
+		return ExternalRoot;
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		instance = this;
-		gameDir = "/storage/emulated/0/StS2BetaLauncher/game";
+		gameDir = ExternalRoot + "/GameFiles";
 
 		SplashScreen.installSplashScreen(this);
 		EdgeToEdge.enable(this);
@@ -118,11 +123,17 @@ public class GodotApp extends GodotActivity {
 	private void setupAssemblies() {
 		File srcDir = findAssembliesDir();
 		File destDir = new File(getFilesDir(), ".godot/mono/publish/arm64");
+		File pckDir = new File(gameDir, "SlayTheSpire2.pck");
 
 		boolean versionChanged = isNewVersion();
 
 		File patcherMarker = new File(destDir, "STS2Mobile.dll");
 		File sts2Marker = new File(destDir, "sts2.dll");
+
+		if(!pckDir.exists() && sts2Marker.exists()) {
+			sts2Marker.delete();
+		} // Temporary soloution
+
 		if (sts2Marker.exists() && patcherMarker.exists() && !versionChanged) {
 			Log.i(TAG, "Assemblies already set up at: " + destDir.getAbsolutePath());
 			return;
@@ -176,7 +187,7 @@ public class GodotApp extends GodotActivity {
 					continue;
 				}
 				File dest = new File(destDir, name);
-				if (dest.exists()) {
+				if (dest.exists()) { // TODO: Need version check
 					continue;
 				}
 				try {
