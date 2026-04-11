@@ -66,7 +66,7 @@ public static class ModLoaderPatches
             matcher.RemoveInstructions(3);          // 删除：ldloc directoryName + ldstr "mods" + call Path.Combine
             var getter = AccessTools.PropertyGetter(typeof(AppPaths), nameof(AppPaths.ExternalModsDir));
             matcher.InsertAndAdvance(
-                new CodeInstruction(OpCodes.Ldstr, getter)
+                new CodeInstruction(OpCodes.Call, getter)
             );
             // 现在 stloc path 会直接存入我们硬编码的完整路径
         }
