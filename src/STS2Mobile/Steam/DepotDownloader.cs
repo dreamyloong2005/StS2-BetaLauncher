@@ -21,21 +21,21 @@ public class DownloadProgress
     public double Percentage => TotalBytes > 0 ? (double)DownloadedBytes / TotalBytes * 100.0 : 0;
 }
 
-public class DepotDownloader : IDisposable
+public class DepotDownloader(SteamConnection connection, string dataDir) : IDisposable
 {
     private const uint AppId = 2868840;
     private const int MaxRetries = 5;
     private const int MaxConcurrentDownloads = 8;
 
-    private readonly SteamConnection _connection;
-    private readonly string _gameDir;
-    private readonly string _stateDir;
-    private readonly Client _cdnClient;
+    private readonly SteamConnection _connection = connection;
+    private readonly string _gameDir = AppPaths.ExternalGameFilesDir;
+    private readonly string _stateDir = Path.Combine(dataDir, "download_state");
+    private readonly Client _cdnClient = new(connection.Client);
     private readonly DownloadProgress _progress = new();
 
     private IReadOnlyList<Server> _servers;
     private int _serverIndex;
-    private readonly Dictionary<(uint, string), string> _cdnAuthTokens = new();
+    private readonly Dictionary<(uint, string), string> _cdnAuthTokens = [];
 
     // MODIFIED: key now includes branch name
     private readonly Dictionary<
@@ -49,14 +49,6 @@ public class DepotDownloader : IDisposable
 
     public event Action<DownloadProgress> ProgressChanged;
     public event Action<string> LogMessage;
-
-    public DepotDownloader(SteamConnection connection, string dataDir)
-    {
-        _connection = connection;
-        _gameDir = Path.Combine(AppPaths.ExternalRoot, "game");
-        _stateDir = Path.Combine(dataDir, "download_state");
-        _cdnClient = new Client(connection.Client);
-    }
 
     public async Task<bool> CheckForUpdatesAsync(CancellationToken ct = default)
     {
