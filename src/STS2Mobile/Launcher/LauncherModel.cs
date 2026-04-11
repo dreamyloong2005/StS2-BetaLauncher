@@ -82,7 +82,7 @@ public class LauncherModel : IDisposable
         {
             return FastPathResult.ReadyToLaunch;
         }
-        
+
         OfflineMode = false;
         ConnectionResolved = false;
         _credentialStore.Load();
@@ -309,6 +309,7 @@ public class LauncherModel : IDisposable
         _auth?.Dispose();
         if (_launchTcs == null)
             _connection?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private async Task VerifyOwnershipAsync()
