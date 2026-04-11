@@ -78,6 +78,11 @@ public class LauncherModel : IDisposable
     // LauncherPatches statics so cloud push/pull works on all code paths.
     public FastPathResult StartSession()
     {
+        if (GameFilesReady())
+        {
+            return FastPathResult.ReadyToLaunch;
+        }
+        
         OfflineMode = false;
         ConnectionResolved = false;
         _credentialStore.Load();
