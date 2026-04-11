@@ -4,7 +4,11 @@ import org.godotengine.godot.Godot;
 import org.godotengine.godot.GodotActivity;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
@@ -30,6 +34,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Base64;
+import android.Manifest;
 
 import org.fmod.FMOD;
 
@@ -50,6 +55,8 @@ public class GodotApp extends GodotActivity {
 	private static final String TAG = "STS2Mobile";
 	private static final String KEYSTORE_ALIAS = "sts2mobile_credentials";
 	private static final String PCK_FILE = "SlayTheSpire2.pck";
+	private static final int REQUEST_STORAGE_PERMISSION = 1;
+    private static final int REQUEST_MANAGE_STORAGE = 2;
 
 	private final Runnable updateWindowAppearance = () -> {
 		Godot godot = getGodot();
@@ -63,7 +70,7 @@ public class GodotApp extends GodotActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		instance = this;
-		gameDir = new File(getFilesDir(), "game").getAbsolutePath();
+		gameDir = "/storage/emulated/0/StS2BetaLauncher/game";
 
 		SplashScreen.installSplashScreen(this);
 		EdgeToEdge.enable(this);
@@ -85,6 +92,10 @@ public class GodotApp extends GodotActivity {
 			Log.i(TAG, "WiFi MulticastLock acquired for LAN discovery");
 		} catch (Exception e) {
 			Log.w(TAG, "Failed to acquire MulticastLock", e);
+		}
+
+		if(!hasStoragePermission()) {
+			requestStoragePermission();
 		}
 	}
 
@@ -383,20 +394,51 @@ public class GodotApp extends GodotActivity {
 	// page for "All files access". On older versions, shows the runtime permission
 	// dialog.
 	public void requestStoragePermission() {
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-			try {
-				Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-				intent.setData(android.net.Uri.parse("package:" + getPackageName()));
-				startActivity(intent);
-			} catch (Exception e) {
-				Log.w(TAG, "Failed to open app-specific storage settings, trying general", e);
-				Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-				startActivity(intent);
-			}
-		} else {
-			requestPermissions(new String[] { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, 1);
-		}
+	    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+	        try {
+	            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+	            intent.setData(Uri.parse("package:" + getPackageName()));
+	            startActivityForResult(intent, REQUEST_MANAGE_STORAGE);
+	        } catch (Exception e) {
+	            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+	            startActivityForResult(intent, REQUEST_MANAGE_STORAGE);
+	        }
+	    } else {
+	        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+	    }
 	}
+
+	@Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 权限授予，重建 Activity
+                Log.i(TAG, "Storage permission granted, recreating activity...");
+                restartApp();
+            } else {
+                // 用户拒绝，可再次请求或退出
+                Log.w(TAG, "Storage permission denied");
+                // 示例：再次请求（避免无限循环，可加计数器）
+                requestStoragePermission();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_MANAGE_STORAGE) {
+            if (hasStoragePermission()) {
+                Log.i(TAG, "Manage storage permission granted, recreating activity...");
+                restartApp();
+            } else {
+                Log.w(TAG, "Manage storage permission not granted");
+                requestStoragePermission();
+            }
+        }
+    }
+
 
 	public void deleteKeystoreKey() {
 		try {
