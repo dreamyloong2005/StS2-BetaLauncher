@@ -50,6 +50,7 @@ public class CloudWriteQueue : IDisposable
         _queue.CompleteAdding();
         _thread.Join(2000);
         _queue.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void ProcessLoop()
