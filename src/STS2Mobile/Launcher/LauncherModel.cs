@@ -12,10 +12,10 @@ namespace STS2Mobile.Launcher;
 // verification, game file downloads, and update checks. Delegates persistence to
 // SteamCredentialStore and ownership to OwnershipVerifier. Events fire from
 // background threads; the controller marshals them to the main thread.
-public class LauncherModel : IDisposable
+public class LauncherModel(string dataDir) : IDisposable
 {
-    private readonly string _dataDir;
-    private readonly SteamCredentialStore _credentialStore;
+    private readonly string _dataDir = dataDir;
+    private readonly SteamCredentialStore _credentialStore = new(dataDir);
 
     private SteamConnection _connection;
     private SteamAuth _auth;
@@ -61,12 +61,6 @@ public class LauncherModel : IDisposable
     public event Action DownloadCancelled;
     public event Action<bool> UpdateCheckCompleted;
     public event Action<string> UpdateCheckFailed;
-
-    public LauncherModel(string dataDir)
-    {
-        _dataDir = dataDir;
-        _credentialStore = new SteamCredentialStore(dataDir);
-    }
 
     public Task WaitForLaunch()
     {
