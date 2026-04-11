@@ -49,6 +49,7 @@ public class SteamKit2CloudSaveStore : ICloudSaveStore, ISaveStore, IDisposable
         _http.Dispose();
         if (Instance == this)
             Instance = null;
+        GC.SuppressFinalize(this);
     }
 
     public string ReadFile(string path)
