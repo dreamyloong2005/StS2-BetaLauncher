@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using STS2Mobile.Launcher.Components;
@@ -281,7 +280,7 @@ public class ShaderWarmupScreen : Control
         PatchHelper.Log(
             $"[ShaderWarmup] {materials.Count} total materials, {unique.Count} unique shaders"
         );
-        return unique.Values.ToList();
+        return [.. unique.Values];
     }
 
     private static string GetShaderKey(Material mat)
@@ -293,7 +292,7 @@ public class ShaderWarmupScreen : Control
         return mat.ResourcePath ?? mat.GetRid().ToString();
     }
 
-    private void CollectFromDirectory(string dirPath, Dictionary<string, Material> materials)
+    private static void CollectFromDirectory(string dirPath, Dictionary<string, Material> materials)
     {
         try
         {
@@ -463,8 +462,10 @@ public class ShaderWarmupScreen : Control
                     }
                     else if (val.Obj is Shader shader)
                     {
-                        var shaderMat = new ShaderMaterial();
-                        shaderMat.Shader = shader;
+                        var shaderMat = new ShaderMaterial
+                        {
+                            Shader = shader
+                        };
                         var key = $"{scenePath}#node{n}#{propName}";
                         materials.TryAdd(key, shaderMat);
                     }
