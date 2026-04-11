@@ -8,23 +8,16 @@ namespace STS2Mobile.Launcher;
 
 // Wires model events to view updates and handles the launcher UI state machine.
 // All model callbacks are marshalled to the main thread before updating the view.
-public class LauncherController
-{
-    private readonly LauncherModel _model;
-    private readonly LauncherView _view;
-    private readonly Action<Action> _runOnMainThread;
-    private volatile bool _checkingForUpdates;
-
-    public LauncherController(
-        LauncherModel model,
-        LauncherView view,
-        Action<Action> runOnMainThread
+public class LauncherController(
+    LauncherModel model,
+    LauncherView view,
+    Action<Action> runOnMainThread
     )
-    {
-        _model = model;
-        _view = view;
-        _runOnMainThread = runOnMainThread;
-    }
+{
+    private readonly LauncherModel _model = model;
+    private readonly LauncherView _view = view;
+    private readonly Action<Action> _runOnMainThread = runOnMainThread;
+    private volatile bool _checkingForUpdates;
 
     public void Start()
     {
