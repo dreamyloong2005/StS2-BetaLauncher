@@ -1,76 +1,125 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using Godot;
+using HarmonyLib;
+using MegaCrit.Sts2.Core.DevConsole;
+using MegaCrit.Sts2.Core.Modding;
+using MegaCrit.Sts2.Core.Nodes.Debug;
+using MegaCrit.Sts2.Core.Saves;
+using MegaCrit.Sts2.Core.TestSupport;
 
-namespace STS2Mobile;
+namespace STS2Mobile.Patches;
 
-// Shared path constants for external storage directories and permission helpers.
-public static class AppPaths
+public static class ModLoaderPatches
 {
-    private const string ExternalRoot = "/storage/emulated/0/StS2BetaLauncher";
-    public const string ExternalModsDir = ExternalRoot + "/Mods";
-    public const string ExternalSaveBackupsDir = ExternalRoot + "/Saves";
+    private static readonly BindingFlags AllStatic =
+        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-    // Returns true if the app has permission to write to shared external storage.
-    public static bool HasStoragePermission()
+    public static void Apply(Harmony harmony)
     {
         try
         {
-            var godotApp = GetGodotApp();
-            if (godotApp == null)
-                return false;
-            return (bool)godotApp.Call("hasStoragePermission");
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    // Requests external storage permission. On Android 11+, opens the system
-    // settings page. On older versions, shows the runtime permission dialog.
-    public static void RequestStoragePermission()
-    {
-        try
-        {
-            var godotApp = GetGodotApp();
-            godotApp?.Call("requestStoragePermission");
+            PatchHelper.Patch(
+                harmony,
+                typeof(ModManager),
+                "Initialize",
+                postfix: PatchHelper.Method(typeof(ModLoaderPatches), nameof(InitializePostfix))
+            );
+            PatchHelper.Patch(
+                harmony,
+                typeof(ModManager),
+                "Initialize",
+                transpiler: PatchHelper.Method(typeof(ModLoaderPatches), nameof(InitializeTranspiler))
+            );
+            PatchHelper.Patch(
+                harmony,
+                typeof(ModManager),
+                "ReadSteamMods",
+                prefix: PatchHelper.Method(typeof(ModLoaderPatches), nameof(ReadSteamModsPrefix))
+            );
+            PatchHelper.Log("[ModLoader] 成功注入 ModManager.Initialize 后置补丁！");
         }
         catch (Exception ex)
         {
-            PatchHelper.Log($"Failed to request storage permission: {ex.Message}");
+            PatchHelper.Log("[ModLoader] 补丁注入失败: " + ex.ToString());
         }
     }
 
-    // Creates the external Mods and Saves directories if storage permission is granted.
-    public static void EnsureExternalDirectories()
+    public static void InitializePostfix()
     {
-        if (!HasStoragePermission())
-            return;
-
-        try
-        {
-            Directory.CreateDirectory(ExternalModsDir);
-        }
-        catch { }
-        try
-        {
-            Directory.CreateDirectory(ExternalSaveBackupsDir);
-        }
-        catch { }
+        CreateAndAssignDevConsole();
     }
 
-    private static GodotObject GetGodotApp()
+    public static IEnumerable<CodeInstruction> InitializeTranspiler(IEnumerable<CodeInstruction> instructions)
+    {
+        var matcher = new CodeMatcher(instructions)
+            .MatchStartForward(new CodeMatch(OpCodes.Ldstr, "mods"));   // 找到唯一一个 "mods" 字符串字面量
+
+        if (matcher.IsValid)
+        {
+            // 当前位置在 ldstr "mods"
+            // 前面一条指令是 ldloc directoryName
+            // 后面是 call Path.Combine + stloc path
+            matcher.Advance(-1);                    // 退到 ldloc directoryName
+            matcher.RemoveInstructions(3);          // 删除：ldloc directoryName + ldstr "mods" + call Path.Combine
+            matcher.InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldstr, AppPaths.ExternalModsDir)
+            );
+            // 现在 stloc path 会直接存入我们硬编码的完整路径
+        }
+        // 如果没找到（理论上不可能），保持原指令（防止崩溃）
+
+        return matcher.InstructionEnumeration();
+    }
+    public static bool ReadSteamModsPrefix()
+    {
+        return false;
+    }
+
+    private static void CreateAndAssignDevConsole()
     {
         try
         {
-            var jcw = Engine.GetSingleton("JavaClassWrapper");
-            var wrapper = (GodotObject)jcw.Call("wrap", "com.game.sts2betalauncher.GodotApp");
-            return (GodotObject)wrapper.Call("getInstance");
+            // 获取 NDevConsole 实例（静态属性 Instance）
+            var consoleInstance = NDevConsole.Instance;
+            if (consoleInstance == null)
+            {
+                PatchHelper.Log("[ModLoader] NDevConsole 实例尚未创建，延迟重试");
+                // 延迟一帧再试（因为 _Ready 可能还没执行完）
+                Callable.From(() => CreateAndAssignDevConsole()).CallDeferred();
+                return;
+            }
+
+            // 计算 shouldAllowDebugCommands（与原逻辑一致）
+            bool hasFullConsole = false;
+            try
+            {
+                hasFullConsole = SaveManager.Instance?.SettingsSave?.FullConsole ?? false;
+            }
+            catch { }
+            bool shouldAllowDebugCommands =
+                OS.HasFeature("editor")
+                || TestMode.IsOn
+                || ModManager.IsRunningModded()
+                || hasFullConsole;
+
+            // 创建 DevConsole 实例
+            var devConsole = new DevConsole(shouldAllowDebugCommands);
+
+            // 通过反射赋值给私有字段 _devConsole
+            var field = typeof(NDevConsole).GetField(
+                "_devConsole",
+                BindingFlags.NonPublic | BindingFlags.Instance
+            );
+            field?.SetValue(consoleInstance, devConsole);
+
+            PatchHelper.Log("[ModLoader] DevConsole 已创建并赋值给 NDevConsole");
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            PatchHelper.Log($"[ModLoader] 创建 DevConsole 失败: {ex}");
         }
     }
 }
