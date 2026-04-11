@@ -99,9 +99,6 @@ public class LauncherModel : IDisposable
             $"[Launcher] Fast path: creds={_credentialStore.HasCredentials}, marker={hasMarker}"
         );
 
-        if (_credentialStore.HasCredentials && hasMarker)
-            return FastPathResult.ReadyToLaunch;
-
         if (_credentialStore.HasCredentials)
             return FastPathResult.AutoConnect;
 
@@ -350,8 +347,8 @@ public class LauncherModel : IDisposable
 
     public static bool GameFilesReady()
     {
-        var pckPath = "/storage/emulated/0/StS2BetaLauncher/game/SlayTheSpire2.pck";
-        
+        var pckPath = AppPaths.ExternalGameFilesDir + "/SlayTheSpire2.pck";
+
         try
         {
             using var fs = File.OpenRead(pckPath);
