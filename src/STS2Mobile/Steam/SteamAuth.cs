@@ -134,6 +134,7 @@ public class SteamAuth : IDisposable
         catch { }
         _callbackThread?.Join(2000);
         _connectedGate.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void StartCallbackThread()
