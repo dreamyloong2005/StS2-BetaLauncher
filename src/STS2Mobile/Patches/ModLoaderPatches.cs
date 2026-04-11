@@ -68,7 +68,6 @@ public static class ModLoaderPatches
             matcher.InsertAndAdvance(
                 new CodeInstruction(OpCodes.Call, getter)
             );
-            // 现在 stloc path 会直接存入我们硬编码的完整路径
         }
         // 如果没找到（理论上不可能），保持原指令（防止崩溃）
 
