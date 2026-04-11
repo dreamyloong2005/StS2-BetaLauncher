@@ -41,7 +41,7 @@ public class LauncherView
         var hbox = new HBoxContainer
         {
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-            SizeFlagsVertical = Control.SizeFlags.ExpandFill
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
         };
         hbox.AddThemeConstantOverride("separation", (int)(16 * scale));
         _panel.Content.AddChild(hbox);
@@ -50,14 +50,11 @@ public class LauncherView
         {
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
             SizeFlagsVertical = Control.SizeFlags.ExpandFill,
-            SizeFlagsStretchRatio = 1f
+            SizeFlagsStretchRatio = 1f,
         };
         hbox.AddChild(leftCenter);
 
-        var left = new VBoxContainer
-        {
-            CustomMinimumSize = new Vector2((int)(200 * scale), 0)
-        };
+        var left = new VBoxContainer { CustomMinimumSize = new Vector2((int)(200 * scale), 0) };
         left.AddThemeConstantOverride("separation", (int)(10 * scale));
         leftCenter.AddChild(left);
 
@@ -67,7 +64,7 @@ public class LauncherView
 
         _statusLabel = new StyledLabel("Initializing...", scale)
         {
-            AutowrapMode = TextServer.AutowrapMode.WordSmart
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
         };
         left.AddChild(_statusLabel);
 
@@ -87,7 +84,7 @@ public class LauncherView
         var fmodContainer = new VBoxContainer
         {
             SizeFlagsVertical = Control.SizeFlags.ExpandFill,
-            Alignment = BoxContainer.AlignmentMode.End
+            Alignment = BoxContainer.AlignmentMode.End,
         };
         left.AddChild(fmodContainer);
 
@@ -106,7 +103,7 @@ public class LauncherView
         var right = new VBoxContainer
         {
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-            SizeFlagsStretchRatio = 4f
+            SizeFlagsStretchRatio = 4f,
         };
         hbox.AddChild(right);
 
@@ -114,10 +111,7 @@ public class LauncherView
         logTitle.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.65f));
         right.AddChild(logTitle);
 
-        Log = new LogView(scale)
-        {
-            SizeFlagsVertical = Control.SizeFlags.ExpandFill
-        };
+        Log = new LogView(scale) { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         Log.GuiInput += DismissKeyboard;
         right.AddChild(Log);
     }
@@ -172,11 +166,13 @@ public class LauncherView
             image.LoadPngFromBuffer(bytes);
 
             var tex = ImageTexture.CreateFromImage(image);
-            var rect = new TextureRect();
-            rect.Texture = tex;
-            rect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
-            rect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
-            rect.CustomMinimumSize = new Vector2((int)(120 * scale), (int)(30 * scale));
+            var rect = new TextureRect
+            {
+                Texture = tex,
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2((int)(120 * scale), (int)(30 * scale))
+            };
             return rect;
         }
         catch (Exception ex)
